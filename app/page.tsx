@@ -1,95 +1,46 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [status, setStatus] = useState("idle");
+  const [msg, setMsg] = useState("");
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  async function testar() {
+    setStatus("loading");
+    setMsg("");
+    try {
+      const res = await fetch("/api/test", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) { setStatus("erro"); setMsg(data.error); return; }
+      setStatus("ok");
+      setMsg(JSON.stringify(data, null, 2));
+    } catch (e) {
+      setStatus("erro");
+      setMsg(e.message);
+    }
+  }
+
+  return (
+    <main style={{minHeight:"100vh",background:"#0a0a0a",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace"}}>
+      <div style={{width:"100%",maxWidth:"480px",padding:"2rem"}}>
+        <h1 style={{color:"#D9FF3F",fontSize:"1.4rem",marginBottom:"0.4rem"}}>INFLUEX AI</h1>
+        <p style={{color:"#666",fontSize:"0.85rem",marginBottom:"2rem"}}>Teste de conexao com a API Replicate</p>
+        <button onClick={testar} disabled={status==="loading"} style={{width:"100%",background:status==="loading"?"#333":"#D9FF3F",color:"#000",border:"none",borderRadius:"8px",padding:"0.9rem",fontSize:"1rem",fontWeight:700,cursor:status==="loading"?"default":"pointer"}}>
+          {status==="loading" ? "Chamando API..." : "Testar API"}
+        </button>
+        {status==="ok" && (
+          <div style={{marginTop:"1.5rem",background:"#0d1a0d",border:"1px solid #D9FF3F",borderRadius:"8px",padding:"1rem"}}>
+            <p style={{color:"#D9FF3F",margin:"0 0 0.5rem"}}>Sucesso!</p>
+            <pre style={{color:"#aaa",fontSize:"0.75rem",margin:0,overflow:"auto"}}>{msg}</pre>
+          </div>
+        )}
+        {status==="erro" && (
+          <div style={{marginTop:"1.5rem",background:"#1a0d0d",border:"1px solid #ff4444",borderRadius:"8px",padding:"1rem"}}>
+            <p style={{color:"#ff6666",margin:"0 0 0.25rem"}}>Erro</p>
+            <p style={{color:"#ff9999",fontSize:"0.85rem",margin:0}}>{msg}</p>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
